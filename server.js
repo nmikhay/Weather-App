@@ -31,10 +31,16 @@ app.get('/news', async (req, res) => {
   }
 });
 
-async function getNewsData(city) {
-  const response = await axios.get(`https://newsapi.org/v2/everything?q=${city}&apiKey=${NEWS_API_KEY}`);
-  return response.data;
+// async function getNewsData(city) {
+//   const response = await axios.get(`https://newsapi.org/v2/everything?q=${city}&apiKey=${NEWS_API_KEY}`);
+//   return response.data;
+// }
+
+function getNewsData(city) {
+  return fetch(`https://your-netlify-app-name.netlify.app/.netlify/functions/get-news?city=${city}`)
+    .then((response) => response.json());
 }
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}!`));
