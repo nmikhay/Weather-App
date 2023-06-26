@@ -4,11 +4,10 @@ window.addEventListener('load', () => {
   const searchButton = document.querySelector('.search-button');
   const searchBar = document.querySelector('.search-bar');
 
-  searchButton.addEventListener('click', async () => {
+  searchButton.addEventListener('click', () => {
     const city = searchBar.value.trim();
     if (city !== '') {
-      await getWeatherData(city);
-      await fetchRecentTweets(city);
+      getWeatherAndNewsData(city);
       searchBar.value = '';
     }
   });
@@ -17,33 +16,59 @@ window.addEventListener('load', () => {
     if (event.key === 'Enter') {
       const city = searchBar.value.trim();
       if (city !== '') {
-        getWeatherData(city);
-        fetchRecentTweets(city);
+        getWeatherAndNewsData(city);
         searchBar.value = '';
       }
     }
   });
 });
 
+async function getWeatherAndNewsData(city) {
+  try {
+    const weatherData = await getWeatherData(city);
+    showWeatherData(weatherData);
+
+    const newsData = await getNewsData(city);
+    showNewsData(newsData);
+
+    setBackgroundImage(city);
+  } catch (error) {
+    console.log(error);
+    alert('Error fetching weather and news data. Please try again.');
+  }
+}
+
+function setBackgroundImage(city) {
+  const body = document.body;
+  const imageUrl = `https://source.unsplash.com/1600x900/?${city}`;
+
+  body.style.backgroundImage = `url(${imageUrl})`;
+}
+
 function getWeatherData(city) {
-  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`)
-    .then((response) => response.json())
-    .then((data) => showWeatherData(data))
-    .catch((error) => {
-      console.log(error);
-      alert('Error fetching weather data. Please try again.');
-    });
+  return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`)
+    .then((response) => response.json());
+}
+
+function getNewsData(city) {
+  return fetch(`http://localhost:3000/news?city=${city}`)
+    .then((response) => response.json());
 }
 
 function showWeatherData(data) {
   const cityElement = document.querySelector('.city');
-  const iconElement = document.querySelector('.icon');
+  const countryElement = document.querySelector('.country');
+  const timeElement = document.querySelector('.time');
+  const iconElement = document.querySelector('.weather-icon .icon');
   const descriptionElement = document.querySelector('.description');
   const temperatureElement = document.querySelector('.temperature');
   const humidityElement = document.querySelector('.humidity');
   const windSpeedElement = document.querySelector('.wind-speed');
 
   const city = data.name;
+  const country = data.sys.country;
+  const timezoneOffset = data.timezone;
+  const localTime = new Date(Date.now() + timezoneOffset * 1000).toLocaleTimeString();
   const icon = data.weather[0].icon;
   const description = data.weather[0].description;
   const temperature = data.main.temp;
@@ -51,6 +76,8 @@ function showWeatherData(data) {
   const windSpeed = data.wind.speed;
 
   cityElement.textContent = city;
+  countryElement.textContent = `Country: ${country}`;
+  timeElement.textContent = `Local Time: ${localTime}`;
   iconElement.src = `http://openweathermap.org/img/wn/${icon}.png`;
   descriptionElement.textContent = description;
   temperatureElement.textContent = `Temperature: ${temperature}°C`;
@@ -58,48 +85,49 @@ function showWeatherData(data) {
   windSpeedElement.textContent = `Wind Speed: ${windSpeed} m/s`;
 }
 
-async function fetchRecentTweets(city) {
-  const hashtag = city.toLowerCase().replace(/\s/g, '');
-  const apiUrl = `http://localhost:3000/tweets?hashtag=${encodeURIComponent(hashtag)}`;
+function showNewsData(data) {
+  const newsListElement = document.querySelector('.news-list');
+  newsListElement.innerHTML = '';
 
-  const response = await fetch(apiUrl);
-  const data = await response.json();
-  displayTweets(data);
-}
+  const articles = data.articles.slice(0, 6);
+  articles.forEach((article, index) => {
+    const articleElement = document.createElement('div');
+    articleElement.className = 'article';
 
-function displayTweets(tweets) {
-  const tweetsContainer = document.querySelector('.tweets-container');
+    const titleElement = document.createElement('h3');
+    const titleLink = document.createElement('a');
+    titleLink.href = article.url;
+    titleLink.textContent = `${index + 1}. ${article.title}`;
+    titleElement.appendChild(titleLink);
+    articleElement.appendChild(titleElement);
 
-  tweetsContainer.innerHTML = '';
+    const sourceElement = document.createElement('p');
+    sourceElement.textContent = article.source.name;
+    articleElement.appendChild(sourceElement);
 
-  tweets.forEach((tweet) => {
-    const tweetElement = document.createElement('div');
-    tweetElement.classList.add('tweet');
+    const descriptionElement = document.createElement('p');
+    descriptionElement.textContent = article.description;
+    articleElement.appendChild(descriptionElement);
 
-    const usernameElement = document.createElement('span');
-    usernameElement.classList.add('username');
-    usernameElement.textContent = `@${tweet.user.screen_name}`;
-
-    const textElement = document.createElement('p');
-    textElement.classList.add('text');
-    textElement.textContent = tweet.text;
-
-    const likesElement = document.createElement('p');
-    likesElement.classList.add('likes');
-    likesElement.textContent = `Likes: ${tweet.favorite_count}`;
-
-    const timestampElement = document.createElement('span');
-    timestampElement.classList.add('timestamp');
-    timestampElement.textContent = new Date(tweet.created_at).toLocaleString();
-
-    tweetElement.appendChild(usernameElement);
-    tweetElement.appendChild(textElement);
-    tweetElement.appendChild(likesElement);
-    tweetElement.appendChild(timestampElement);
-
-    tweetsContainer.appendChild(tweetElement);
+    newsListElement.appendChild(articleElement);
   });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

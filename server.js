@@ -1,28 +1,46 @@
 const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+const searchButton = document.querySelector('.search-button');
+const searchBar = document.querySelector('.search-bar');
+const container = document.querySelector('.container');
+
 const app = express();
-const port = 3000;
+app.use(cors());
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+const NEWS_API_KEY = '25f3575f395449c581d127cb0075588c';
+
+searchButton.addEventListener('click', function () {
+  const city = searchBar.value;
+  const imageUrl = `https://source.unsplash.com/1600x900/?${city}`;
+  container.style.backgroundImage = `url('${imageUrl}')`;
 });
 
-const { TwitterClient } = require('twitter-api-client');
-
-const twitterClient = new TwitterClient({
-  apiKey: 'x8zmkl7uLnhsGYSen09wieHq5',
-  apiSecret: '8A9fjVI0lTg222grWv7P1xZLfEarHMC9rYLlvznba8VjawDxOp',
-  accessToken: '1375948652-zQMJUW91KxZvF1AbWbg1fkh1XmHxSPi3vbwDSYq',
-  accessTokenSecret: 'GMjfeEp3btGsWpD1HN9DDG2N95w5qAUlenLNTpIpVlzswj9AFT'
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
 
-app.get('/tweets', async (req, res) => {
+app.get('/news', async (req, res) => {
   try {
     const city = req.query.city;
-    const data = await twitterClient.tweets.search({ q: `#${city}`, count: 5 });
-
-    res.json(data.statuses);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('An error occurred while fetching tweets.');
+    const newsData = await getNewsData(city);
+    res.send(newsData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Error fetching news data. Please try again.');
   }
 });
+
+async function getNewsData(city) {
+  const response = await axios.get(`https://newsapi.org/v2/everything?q=${city}&apiKey=${NEWS_API_KEY}`);
+  return response.data;
+}
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}!`));
+
+
+
+
+
+

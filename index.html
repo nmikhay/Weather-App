@@ -11,34 +11,45 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">Weather App</h1>
-      <div class="search">
-        <input type="text" class="search-bar" placeholder="Search">
-        <button class="search-button">Search</button>
+      <div class="app-title">
+        <h1 class="title">Weather App</h1>
+        <div class="weather-icon">
+          <img src="https://pbs.twimg.com/profile_images/1173919481082580992/f95OeyEW_400x400.jpg" alt="Weather Icon" class="icon">
+        </div>
       </div>
     </div>
-    <div class="current-weather">
-      <div class="weather-icon">
-        <img src="https://pbs.twimg.com/profile_images/1173919481082580992/f95OeyEW_400x400.jpg" alt="Weather Icon" class="icon">
-      </div>
-      <div class="weather-info">
-        <h2 class="city">City</h2>
-        <p class="description">Description</p>
-        <p class="temperature">Temperature</p>
-        <p class="humidity">Humidity</p>
-        <p class="wind-speed">Wind Speed</p>
+    <div class="search">
+      <input type="text" id="city-input" class="search-bar" placeholder="Enter your city here">
+      <button id="search-button" class="search-button">Search</button>
+    </div>
+    <div class="content">
+      <div class="current-weather">
+        <div class="weather-info">
+          <h2 class="city">City</h2>
+          <h4 class="country">Country</h4>
+          <h4 class="time">Time</h4>
+          <p class="description">Description</p>
+          <p class="temperature">Temperature</p>
+          <p class="humidity">Humidity</p>
+          <p class="wind-speed">Wind Speed</p>
+        </div>
       </div>
     </div>
-    <div class="tweets-container">
-      <!-- Tweets will be dynamically populated here -->
+    <div class="news">
+      <h2 class="news-title">Local News</h2>
+      <div class="news-list"></div>
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <script src="script.js"></script>
 </body>
 
 </html>
+
+
+
+
+
 
 
 
